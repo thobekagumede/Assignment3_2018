@@ -6,7 +6,7 @@ public class ParallelProgram {
 	public double matrixArray[];
 	public int row = 0;
 	public int column = 0;
-	public double totalSum = 0;
+//	public double totalSum = 0.0;
 	
 	public static void main(String[] args) {
 		File file = new File("sample_in.txt");
@@ -79,12 +79,16 @@ public class ParallelProgram {
 	}
 	
 	private static void computeSequential(int numOfTrees, Tree [] treeArray, int rowSize, double [] sunlightMatrix) {
+		double totalSum = 0.0;
+		String treeSumString = "";
 		for (int i=0; i<numOfTrees; i++) {
 			double treeSum = sunlightSum(treeArray[i],rowSize,sunlightMatrix);
-//			totalSum += treeSum;
-			System.out.println(treeSum);
-//			System.out.println(matrixArray[i]);
-		}	
+			totalSum += treeSum;
+			treeSumString += treeSum + "\n";
+		}
+		double average = totalSum/numOfTrees;
+		System.out.println(average + "\n" + numOfTrees + "\n" + treeSumString);
+
 		
 	}
 
