@@ -2,26 +2,17 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
-public class ParallelProgram {
-	public double matrixArray[];
-	public int row = 0;
-	public int column = 0;
-//	public double totalSum = 0.0;
-	
-	public static void main(String[] args) {
+public class ParallelProgram
+{	
+	public static void main(String[] args) 
+	{
 		File file = new File("sample_in.txt");
-		try {
+		try 
+		{
 			BufferedReader buff = new BufferedReader(new FileReader(file));
 			String line = null;
-//			buff.readLine();
-			int counter = 0;
-			String dimensionStr = null;
-			String var1 = null;
 			int numOfTrees = 0;
-			int[] tree_row = null;
-			int[] tree_column = null;
-			int[] tree_extent = null;
-			
+
 			// Read in dimensions
 			line = buff.readLine();
 			String[] matrixSize = line.trim().split("\\s+");
@@ -32,7 +23,8 @@ public class ParallelProgram {
 			line = buff.readLine();
 			String[] sunlightStringMatrix = line.trim().split("\\s+");
 			double sunlightMatrix[] = new double[rowSize*columnSize]; 
-			for(int i=0; i<rowSize*columnSize; i++) {
+			for(int i=0; i<rowSize*columnSize; i++)
+			{
 				sunlightMatrix[i] = Double.parseDouble(sunlightStringMatrix[i]);
 			}
 			
@@ -52,61 +44,72 @@ public class ParallelProgram {
 				int extent = Integer.parseInt(treeInfo[2]);
 				
 				treeArray[j] = new Tree(xCoord, yCoord, extent);
-				
 			}
 			
 			// Done reading from file
 			buff.close();
 			
 			// Sequential implementation
-			
+			long tic = System.currentTimeMillis();
 			computeSequential(numOfTrees, treeArray, rowSize, sunlightMatrix);
+			long seqToc = System.currentTimeMillis() - tic;
+			System.out.println("Sequential: " + seqToc);
 			
+			tic = System.currentTimeMillis();
+			System.out.println("==========================================================");
 			// Parallel implementation
-			
-			
-//			System.out.println(sunlightSum(0,1,7,row,matrixArray));
-			
-					
+			computeParallel(numOfTrees, treeArray, rowSize, sunlightMatrix);
+			long parToc = System.currentTimeMillis() - tic;
+			System.out.println("Parallel: " + parToc);
 		} 
 		
-		catch (Exception e) {
-			// TODO Auto-generated catch block
+		catch (Exception e)
+		{
 			e.printStackTrace();
 		}
 		
 		
 	}
 	
-	private static void computeSequential(int numOfTrees, Tree [] treeArray, int rowSize, double [] sunlightMatrix) {
+	private static void computeParallel(int numOfTrees, Tree[] treeArray, int rowSize, double[] sunlightMatrix) {
+		// Start parallel
+		StringBuilder treeSumString = new StringBuilder();
+		ParallelTask task = new ParallelTask(numOfTrees, treeArray, rowSize, sunlightMatrix, treeSumString);
+		double totalSum = task.compute();
+		double average = totalSum/numOfTrees;
+		System.out.println(average + "\n" + numOfTrees + "\n" + treeSumString.toString().trim());
+		
+	}
+
+	private static void computeSequential(int numOfTrees, Tree [] treeArray, int rowSize, double [] sunlightMatrix) 
+	{
 		double totalSum = 0.0;
 		String treeSumString = "";
-		for (int i=0; i<numOfTrees; i++) {
+		for (int i=0; i<numOfTrees; i++)
+		{
 			double treeSum = sunlightSum(treeArray[i],rowSize,sunlightMatrix);
 			totalSum += treeSum;
 			treeSumString += treeSum + "\n";
 		}
 		double average = totalSum/numOfTrees;
 		System.out.println(average + "\n" + numOfTrees + "\n" + treeSumString);
-
-		
 	}
 
-	private static double sunlightSum(Tree tree, int dimension, double [] mat) {
+	public static double sunlightSum(Tree tree, int dimension, double [] mat)
+	{
 		int x = tree.getxCoord();
 		int y = tree.getyCoord();
 		int extent = tree.getExtent();
 		int x_extent = x + extent;
 		int y_extent = y + extent;
 		double sum = 0.0;
-		int counter = 0;
-		for (int i=x; i<x_extent && i < dimension; i++) {
-			for(int j=y; j<y_extent && j < dimension; j++) {
+		for (int i=x; i<x_extent && i < dimension; i++) 
+		{
+			for(int j=y; j<y_extent && j < dimension; j++)
+			{
 				sum += mat[j+i*dimension];
-				counter++;
 			}
 		}
 		return sum;		
 	}
-
 }
