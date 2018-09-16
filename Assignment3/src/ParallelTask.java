@@ -1,7 +1,7 @@
 import java.util.concurrent.RecursiveTask;
 
 public class ParallelTask extends RecursiveTask<Double>{
-	static final int SEQUENTIAL_CUTOFF=2;
+	static final int SEQUENTIAL_CUTOFF=500;
 	int numOfTrees;
 	Tree[] treeArray;
 	int rowSize; 
